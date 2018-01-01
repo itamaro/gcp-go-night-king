@@ -14,4 +14,5 @@
 .glide/
 
 # The vendor directory
+# https://github.com/golang/dep/blob/master/docs/FAQ.md#should-i-commit-my-vendor-directory
 vendor/
