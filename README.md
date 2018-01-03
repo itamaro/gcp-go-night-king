@@ -67,3 +67,23 @@ The Docker bind-mount is useful to share your host Google Cloud credentials - fe
 There are multiple ways to have the service running "in production" (e.g., not in the foreground of your dev-machine terminal).
 
 You can use whatever method fits your environment (deployment-setup contributions are welcome). See below details for already-supprted methods.
+
+## Deploying the Night King service to Kubernetes
+
+If you have a Kubernetes cluster, it makes sense deploying this service to the cluster.
+
+The following assumes you have [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/), and it is configured with the correct cluster.
+
+First, create a config-map with your project ID:
+
+```sh
+kubectl create configmap nightking-config --from-literal=project.id=<YOUR-PROJECT-ID>
+```
+
+Now you can deploy the service by applying the deployment YAML:
+
+```sh
+kubectl apply -f k8s-deploy.yaml
+```
+
+Feel free to modify the deployment YAML to fit your needs (resources, Docker image, other flags, etc.).

@@ -1,0 +1,29 @@
+# Night King service K8s YAML
+
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: gcp-nightking
+spec:
+  replicas: 1
+  revisionHistoryLimit: 2
+  template:
+    metadata:
+      labels:
+        app: gcp-nightking
+    spec:
+      containers:
+      - name: nightking
+        image: itamarost/gcp-night-king:v1-golang
+        command: ["nightking", "-project", "$(PROJECT_ID)"]
+        imagePullPolicy: Always
+        env:
+        - name: "PROJECT_ID"
+          valueFrom:
+            configMapKeyRef:
+              name: nightking-config
+              key: project.id
+        resources:
+          limits:
+            cpu: 1000m
+            memory: 2Gi
