@@ -5,7 +5,7 @@ WORKDIR /go/src/github.com/itamaro/gcp-go-night-king/
 # https://github.com/golang/dep/blob/master/docs/FAQ.md#how-do-i-use-dep-with-docker
 COPY Gopkg.toml Gopkg.lock ./
 RUN dep ensure -vendor-only
-COPY main.go .
+COPY main.go nightking.go ./
 # Need to create 100% static binaries to make it work in scratch / alpine
 # https://github.com/golang/go/issues/9344#issuecomment-69944514
 RUN CGO_ENABLED=0 go build -a -installsuffix cgo -o nightking .
