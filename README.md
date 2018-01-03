@@ -87,3 +87,27 @@ kubectl apply -f k8s-deploy.yaml
 ```
 
 Feel free to modify the deployment YAML to fit your needs (resources, Docker image, other flags, etc.).
+
+## Development
+
+This project is written in Go, and uses [Dep](https://github.com/golang/dep) for dependency management.
+
+To hack on this project:
+
+```sh
+go get -d github.com/itamaro/gcp-go-night-king
+cd $GOPATH/itamaro/gcp-go-night-king
+dep ensure
+
+# Build & run from source
+go run main.go nightking.go -project PROJECT_ID -subscription-name SUBSCRIPTION_NAME
+
+# Run unit tests
+go test
+```
+
+Building the Docker image:
+
+```sh
+docker build -t itamarost/gcp-night-king:v1-golang .
+```
