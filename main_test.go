@@ -6,7 +6,8 @@ package main
 import "testing"
 
 func TestGoodMessageParsing(t *testing.T) {
-	parsed, err := parseNightKingMessage([]byte(`
+	nk := new(nightKing)
+	parsed, err := nk.parseMessage([]byte(`
 		{
 			"name": "foo",
 			"zone": "bar"
@@ -24,7 +25,8 @@ func TestGoodMessageParsing(t *testing.T) {
 }
 
 func TestBadMessageParsing(t *testing.T) {
-	_, err := parseNightKingMessage([]byte(`
+	nk := new(nightKing)
+	_, err := nk.parseMessage([]byte(`
 		{
 			"foo": "bar"
 		}
@@ -35,7 +37,8 @@ func TestBadMessageParsing(t *testing.T) {
 }
 
 func TestBrokenMessageParsing(t *testing.T) {
-	_, err := parseNightKingMessage([]byte("foo"))
+	nk := new(nightKing)
+	_, err := nk.parseMessage([]byte("foo"))
 	if err == nil {
 		t.Fatal("Expected parsing to fail, but it was successful")
 	}
