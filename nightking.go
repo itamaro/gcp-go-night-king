@@ -27,6 +27,8 @@ type nightKing struct {
 	ComputeService *compute.Service
 }
 
+// Init initializes a NightKing service instance by creating a PubSub subscription
+// and a GCE Compute API service for the instance ProjectID and SubscriptionName.
 func (nk *nightKing) Init() {
 	ctx := context.Background()
 	// Create a Pub/Sub client and get a subscription reference.
@@ -46,9 +48,12 @@ func (nk *nightKing) Init() {
 	}
 }
 
-func (nk nightKing) handleMessages() {
+// HandleMessages goes into PubSub subscription listening mode,
+// processing incoming messages from the subscription, forever.
+func (nk nightKing) HandleMessages() {
 	log.Printf("Listening for messages on subscription: %s", nk.Subscription.String())
-	err := nk.Subscription.Receive(context.Background(), func(ctx context.Context, m *pubsub.Message) {
+	err := nk.Subscription.Receive(
+			context.Background(), func(ctx context.Context, m *pubsub.Message) {
 		nk.handleMessage(m.Data)
 		log.Printf("ACKing meesage\n%s", m.Data)
 		m.Ack()
@@ -65,7 +70,9 @@ func (nk nightKing) handleMessage(message []byte) {
 		log.Printf("Failed parsing message - ignoring:\n%s", message)
 		return
 	}
-	nk.resurrectInstance(instanceInfo.Zone, instanceInfo.Name)
+	if nk.waitForInstanceTermination(instanceInfo.Zone, instanceInfo.Name) {
+		nk.resurrectInstance(instanceInfo.Zone, instanceInfo.Name)
+	}
 }
 
 // parsenightKingMessage parses a JSON-formatted message and returns the parsed
@@ -81,29 +88,42 @@ func (nk nightKing) parseMessage(message []byte) (parsed gceInstanceInfo, err er
 	return
 }
 
-func (nk nightKing) resurrectInstance(zone string, instance string) {
-	keepTrying := true
-	for keepTrying {
+func (nk nightKing) waitForInstanceTermination(zone string, instance string) bool {
+	stillRunningCount := 0
+	for {
 		instanceStatus, err := nk.getInstanceStatus(zone, instance)
 		if err != nil {
 			log.Printf("No instance '%s' in zone '%s'", instance, zone)
-			return
+			return false
 		}
-		keepTrying = false
 		switch instanceStatus {
-		case "STOPPING":
-			log.Printf("Instance %s/%s is being stopped - waiting...", zone, instance)
-			keepTrying = true
-			time.Sleep(30 * time.Second)
 		case "TERMINATED":
-			log.Printf("Attemping to start instance %s/%s", zone, instance)
-			err := nk.startInstance(zone, instance)
-			if (err != nil) {
-				log.Printf("Error in start instance %s/%s API call: %v", zone, instance, err)
+			log.Printf("Instance %s/%s terminated", zone, instance)
+			return true
+		case "STOPPING":
+			log.Printf("Instance %s/%s is stopping - waiting for termination", zone, instance)
+			time.Sleep(10 * time.Second)
+		case "RUNNING":
+			stillRunningCount++
+			if stillRunningCount > 6 {
+				log.Printf("Instance %s/%s has been running for the last 3 minutes - " +
+					"assuming it's not about to terminate", zone, instance)
+				return false
 			}
+			log.Printf("Instance %s/%s still running - waiting for its termination", zone, instance)
+			time.Sleep(30 * time.Second)
 		default:
-			log.Printf("Instance %s/%s not terminated - ignoring", zone, instance)
+			log.Printf("Not sure how to handle instance %s/%s status: %s -- ignoring",
+				zone, instance, instanceStatus)
 		}
+	}
+}
+
+func (nk nightKing) resurrectInstance(zone string, instance string) {
+	log.Printf("Attemping to start instance %s/%s", zone, instance)
+	err := nk.startInstance(zone, instance)
+	if (err != nil) {
+		log.Printf("Error in start instance %s/%s API call: %v", zone, instance, err)
 	}
 }
 

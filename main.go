@@ -21,5 +21,5 @@ func main() {
 	nk := &nightKing{*projectID, *subscriptionName, nil, nil}
 	nk.Init()
 	// Start listening and handling messages
-	nk.handleMessages()
+	nk.HandleMessages()
 }
