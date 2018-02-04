@@ -72,6 +72,15 @@ You can use whatever method fits your environment (deployment-setup contribution
 
 If you have a Kubernetes cluster, it makes sense deploying this service to the cluster.
 
+Using Helm (the service is available via the official stable Helm repository):
+
+```sh
+helm repo update
+helm install --set projectID=YOUR_PROJECT_ID stable/gcp-night-king
+```
+
+Alternatively, use `kubectl` directly:
+
 The following assumes you have [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/), and it is configured with the correct cluster.
 
 First, create a config-map with your project ID:
