@@ -1,4 +1,4 @@
-# GCP Night King
+# GCP Night King [![Build Status](https://travis-ci.org/itamaro/gcp-go-night-king.svg?branch=master)](https://travis-ci.org/itamaro/gcp-go-night-king)
 
 A service for resurrecting pre-empted GCE instances.
 
