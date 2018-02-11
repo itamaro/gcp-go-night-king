@@ -1,0 +1,8 @@
+language: go
+python:
+  - 1.8.x
+  - 1.9.x
+  - master
+before_install:
+  - go get -u github.com/golang/dep/cmd/dep
+  - dep ensure
